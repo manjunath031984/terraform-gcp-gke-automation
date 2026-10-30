@@ -1,0 +1,38 @@
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gke-pd-standard
+  labels:
+    environment: dev
+    managed-by: terraform-automation
+
+provisioner: pd.csi.storage.gke.io
+
+parameters:
+  type: pd-standard
+
+volumeBindingMode: WaitForFirstConsumer
+
+allowVolumeExpansion: true
+
+reclaimPolicy: Retain
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gke-pd-balanced
+  labels:
+    environment: dev
+    managed-by: terraform-automation
+
+provisioner: pd.csi.storage.gke.io
+
+parameters:
+  type: pd-balanced
+
+volumeBindingMode: WaitForFirstConsumer
+
+allowVolumeExpansion: true
+
+reclaimPolicy: Retain

@@ -1,0 +1,111 @@
+# F5 NGINX Ingress Controller
+# NGINX Open Source edition
+# Helm chart: nginx-ingress
+
+controller:
+
+  # --------------------------------------------------
+  # CONTROLLER CONFIGURATION
+  # --------------------------------------------------
+
+  name: nginx-ingress-controller
+  kind: deployment
+  nginxplus: false
+
+  replicaCount: 1
+
+  # Schedule NGINX on the application node pool.
+  nodeSelector:
+    workload: app
+
+  # Graceful shutdown.
+  terminationGracePeriodSeconds: 300
+
+  # --------------------------------------------------
+  # INGRESS CLASS CONFIGURATION
+  # --------------------------------------------------
+
+  ingressClass:
+    name: nginx
+    create: true
+    setAsDefaultIngress: false
+
+  # --------------------------------------------------
+  # KUBERNETES SERVICE CONFIGURATION
+  # --------------------------------------------------
+
+  service:
+    create: true
+    type: LoadBalancer
+
+    # GKE regional external passthrough Network Load Balancer.
+    loadBalancerClass: networking.gke.io/l4-regional-external
+
+    # Preserve original client source IP.
+    externalTrafficPolicy: Local
+
+    # Terraform-reserved GCP regional static IP.
+    annotations:
+      cloud.google.com/l4-rbs: "enabled"
+      networking.gke.io/load-balancer-ip-addresses: "gke-dev-nginx-public-ip"
+
+    # HTTP configuration.
+    httpPort:
+      enable: true
+      port: 80
+      targetPort: 80
+
+    # HTTPS configuration.
+    httpsPort:
+      enable: true
+      port: 443
+      targetPort: 443
+
+  # --------------------------------------------------
+  # RESOURCE CONFIGURATION
+  # --------------------------------------------------
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # --------------------------------------------------
+  # NGINX STATUS CONFIGURATION
+  # --------------------------------------------------
+
+  nginxStatus:
+    enable: true
+    port: 8080
+    allowCidrs: "127.0.0.1,::1"
+
+  # --------------------------------------------------
+  # HEALTH STATUS CONFIGURATION
+  # --------------------------------------------------
+
+  healthStatus: true
+  healthStatusURI: /nginx-health
+
+  # --------------------------------------------------
+  # CUSTOM RESOURCE CONFIGURATION
+  # --------------------------------------------------
+
+  enableCustomResources: true
+
+  # --------------------------------------------------
+  # SECURITY CONFIGURATION
+  # --------------------------------------------------
+
+  enableSnippets: false
+
+  # --------------------------------------------------
+  # INGRESS STATUS CONFIGURATION
+  # --------------------------------------------------
+
+  reportIngressStatus:
+    enable: true
+    enableLeaderElection: true
